@@ -1,6 +1,6 @@
 # AstrBot Adapter (Forge) 群服互通适配器
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/OMSociety/MineAstrbotForge)
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/OMSociety/AstrBotAdapter_Forge)
 [![AstrBot](https://img.shields.io/badge/AstrBot-%E2%89%A5v4-green.svg)](https://github.com/AstrBotDevs/AstrBot)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-orange.svg)](https://www.minecraft.net/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)

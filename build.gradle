@@ -144,8 +144,11 @@ dependencies {
 
     // snakeyaml：ConfigManager 解析/写出 YAML 配置（原 Paper 插件依赖）
     // MC 1.20.1 运行时未捆绑 snakeyaml，需 jarJar 打进 mod jar
+    // range [2.0,)：环境已有更高版本（如 OctoLib 内置 2.2）时由 FML 复用，避免 jarJar 同名仲裁二选一
     implementation 'org.yaml:snakeyaml:2.0'
-    jarJar 'org.yaml:snakeyaml:[2.0,2.0]'
+    jarJar('org.yaml:snakeyaml:2.0') {
+        jarJar.ranged(it, "[2.0,)")
+    }
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
