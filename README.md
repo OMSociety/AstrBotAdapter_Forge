@@ -54,14 +54,10 @@
 
 > 仅服务端安装，客户端无需安装（`displayTest = IGNORE_ALL_VERSION`）
 
-### 第一步：构建 mod
-需要 JDK 17+（ForgeGradle 1.20.1 要求）：
+### 第一步：下载 mod
+从 [GitHub Releases](https://github.com/OMSociety/AstrBotAdapter_Forge/releases/latest) 下载最新版 `astrbotadapter-1.0.0-all.jar`。
 
-```bash
-./gradlew build
-```
-
-编译后的 jar（`astrbotadapter-1.0.0.jar`）位于 `build/libs/` 目录。
+> 想从源码自行构建？需要 JDK 17+（ForgeGradle 1.20.1 要求），执行 `./gradlew build`，产物位于 `build/libs/`。
 
 ### 第二步：安装
 1. 将 jar 放入服务端 `mods/` 目录
