@@ -2,7 +2,7 @@
 
 本文档定义 AstrbotAdaptor Java 插件对外暴露给 AstrBot/Python 侧的 v2 协议。
 
-Java 端实现与本文档是当前协议基准；不描述旧协议兼容行为。Velocity 与后端服务器之间的内部 Plugin Messaging 协议见 `doc/proxy-bridge.md`。
+Java 端实现与本文档是当前协议基准；不描述旧协议兼容行为。本 Forge 版本已移除 Velocity 代理模块，仅保留独立模式（WS/REST）。
 
 ## 1. Transport
 

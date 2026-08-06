@@ -17,6 +17,9 @@ public enum PlatformType {
     /** Velocity代理端 */
     VELOCITY("Velocity"),
     
+    /** Forge 服务端 */
+    FORGE("Forge"),
+    
     /** 未知平台 */
     UNKNOWN("Unknown");
 
