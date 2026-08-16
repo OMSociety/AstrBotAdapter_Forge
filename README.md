@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/OMSociety/AstrBotAdapter_Forge/main/icon.png" width="120" alt="AstrBotAdapter Forge Logo" />
 
-# 🧱 Astrbot Adapter (Forge) 群服互通适配器
+# Astrbot Adapter (Forge) 群服互通适配器
 
 **连接 Minecraft Forge 服务器与 AstrBot** —— 消息互通 · 服务器状态监控 · 远程指令执行 · 游戏内 AI 聊天
 
