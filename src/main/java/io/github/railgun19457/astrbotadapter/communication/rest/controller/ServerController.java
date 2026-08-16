@@ -154,6 +154,11 @@ public class ServerController {
         ProtocolInfo.addTo(data);
         data.add("servers", servers);
         data.add("aggregate", aggregate);
+        // 顶层扁平字段：兼容孪生插件（astrbot_plugin_minecraft_adapter）的 ServerInfo 解析
+        copyLocalToTopLevel(data, local);
+        data.addProperty("uptime", server.getUptime());
+        data.addProperty("uptimeFormatted", formatUptime(server.getUptime()));
+        data.add("backends", new JsonArray());
         return data;
     }
 
@@ -217,6 +222,12 @@ public class ServerController {
         ProtocolInfo.addTo(data);
         data.add("servers", servers);
         data.add("aggregate", aggregate);
+        // 顶层扁平字段：兼容孪生插件（astrbot_plugin_minecraft_adapter）的 ServerStatus 解析
+        copyLocalToTopLevel(data, local);
+        data.addProperty("online", true);
+        data.add("worlds", new JsonArray());
+        data.add("plugins", new JsonObject());
+        data.add("backends", new JsonArray());
         return data;
     }
 
@@ -252,6 +263,8 @@ public class ServerController {
         JsonObject data = new JsonObject();
         ProtocolInfo.addTo(data);
         data.add("servers", servers);
+        // 顶层扁平字段：兼容孪生插件
+        data.add("tps", local.get("tps"));
         return data;
     }
 
@@ -287,6 +300,8 @@ public class ServerController {
         JsonObject data = new JsonObject();
         ProtocolInfo.addTo(data);
         data.add("servers", servers);
+        // 顶层扁平字段：兼容孪生插件
+        data.add("mspt", local.get("mspt"));
         return data;
     }
 
@@ -320,6 +335,25 @@ public class ServerController {
         }
         if (rawMemory.has("max")) normalized.add("max", rawMemory.get("max"));
         return normalized;
+    }
+
+    /**
+     * 把本地服务器的关键字段复制到 data 顶层，兼容孪生插件
+     * （astrbot_plugin_minecraft_adapter）从 data 顶层解析 ServerInfo/ServerStatus 的写法。
+     * servers[] 结构保持不变，协议文档继续成立。
+     */
+    private void copyLocalToTopLevel(JsonObject data, JsonObject local) {
+        for (String key : new String[]{"id", "name", "displayName", "platform", "version",
+                "motd", "onlinePlayers", "maxPlayers", "port", "uptime", "uptimeFormatted",
+                "online", "tps", "mspt", "memory", "scope"}) {
+            if (local.has(key)) {
+                data.add(key, local.get(key));
+            }
+        }
+        // 孪生插件 ServerInfo 兼容别名
+        if (local.has("onlinePlayers")) {
+            data.add("onlineCount", local.get("onlinePlayers"));
+        }
     }
 
     private JsonElement normalizeLocalTps(double[] tps) {
@@ -402,7 +436,7 @@ public class ServerController {
         });
 
         try {
-            return future.get(3, TimeUnit.SECONDS);
+            return future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("获取服务器状态失败", e);
         }

@@ -1,47 +1,75 @@
-# AstrBot Adapter (Forge) 群服互通适配器
+<div align="center">
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/OMSociety/AstrBotAdapter_Forge)
-[![AstrBot](https://img.shields.io/badge/AstrBot-%E2%89%A5v4-green.svg)](https://github.com/AstrBotDevs/AstrBot)
+<img src="https://raw.githubusercontent.com/OMSociety/AstrBotAdapter_Forge/main/icon.png" width="120" alt="AstrBotAdapter Forge Logo" />
+
+# 🧱 Astrbot Adapter (Forge) 群服互通适配器
+
+**连接 Minecraft Forge 服务器与 AstrBot** —— 消息互通 · 服务器状态监控 · 远程指令执行 · 游戏内 AI 聊天
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/OMSociety/AstrBotAdapter_Forge)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-orange.svg)](https://www.minecraft.net/)
+[![Forge](https://img.shields.io/badge/Forge-47.x-green.svg)](https://files.minecraftforge.net/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/OMSociety/AstrBotAdapter_Forge)](https://github.com/OMSociety/AstrBotAdapter_Forge/stargazers)
+[![Issues](https://img.shields.io/github/issues/OMSociety/AstrBotAdapter_Forge)](https://github.com/OMSociety/AstrBotAdapter_Forge/issues)
 
-一个用于连接 Minecraft Forge 服务器和 AstrBot 的 Mod，支持消息互通、服务器状态监测、远程指令执行与游戏内 AI 聊天。
+[✨ 核心特性](#-核心特性) • [📖 功能概览](#-功能概览) • [🚀 快速开始](#-快速开始) • [🎮 游戏内指令](#-游戏内指令) • [⚙️ 配置项说明](#️-配置项说明) • [🧩 架构](#-架构) • [📝 更新日志](#-更新日志)
 
-> 大部分代码来源于 [AstrBotAdapter](https://github.com/Railgun19457/AstrBotAdapter)（原作者 [railgun19457](https://github.com/Railgun19457)）
+</div>
+
+> 🎨 本项目由 AI 编写 · 移植自 [AstrBotAdapter](https://github.com/Railgun19457/AstrBotAdapter)（原作者 [railgun19457](https://github.com/Railgun19457)）
 >
-> 本仓库为其 **Forge 1.20.1 服务端移植版**：移除 Bukkit / Folia / Velocity 平台与代理模式，仅保留独立模式（WS/REST）。
+> 本仓库为 **Forge 1.20.1 服务端移植版**：移除 Bukkit / Folia / Velocity 平台与代理模式，仅保留独立模式（WS/REST）。
 
-[📖 功能概览](#-功能概览) • [🚀 快速开始](#-快速开始) • [⚙️ 配置项说明](#-配置项说明) • [🧩 架构](#-架构) • [🎮 游戏内指令](#-游戏内指令) • [📝 更新日志](#-更新日志) • [🤝 贡献与反馈](#-贡献与反馈) • [📜 许可证](#-许可证)
+---
+
+## ✨ 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| 🧱 **消息互通** | 游戏内聊天 ↔ AstrBot 双向转发，支持发送者信息展示与自定义显示格式 |
+| 📊 **服务器状态监控** | 在线人数 / 内存 / 运行时间 / **TPS / MSPT** —— Forge 原生自统计，**无需前置 mod** |
+| 🛡️ **远程指令执行** | REST / WebSocket 远程执行服务器指令，黑白名单 + `*` 通配符过滤 |
+| 🤖 **游戏内 AI 聊天** | `@` 群聊 / `#` 私聊前缀触发，思考中提示，回复格式可自定义 |
+| 🔔 **玩家事件通知** | 玩家加入 / 离开服务器实时推送到 AstrBot |
+| ⚙️ **游戏内指令** | `/astrbot` 管理指令：状态查看 / 配置热重载 / token 管理 / 连接数查询 |
+| 🔄 **配置热重载** | `/astrbot reload` 即时生效，**含端口等网络配置**（自动重启通信服务） |
 
 ---
 
 ## 📖 功能概览
 
-### 消息互通
-服务器聊天消息实时转发至 AstrBot，AstrBot 也可向服务器发送消息，支持发送者信息展示：
+### 🧱 消息互通
+服务器聊天消息实时转发至 AstrBot，AstrBot 也可向服务器发送消息：
 - 💬 游戏内 → AstrBot：玩家聊天自动转发（支持前缀过滤与自定义显示格式）
 - 📨 AstrBot → 游戏内：外部消息推送至服务器，显示平台来源与发送者
 
-### 服务器状态监控
+### 📊 服务器状态监控
 实时监测并上报服务器运行状态：
 - 👥 **玩家信息** — 在线列表与数量变化
-- 📊 **TPS** — 服务器运行流畅度
+- 📈 **TPS / MSPT** — 基于 `ServerTickEvent` 自统计（1m / 5m / 15m 滑动窗口），Forge 原生实现，无 Bukkit API 依赖
 - 🧠 **内存** — JVM 内存使用情况
+- ⏱️ **运行时间** — 服务器已运行时长
 
-### 远程指令执行
+> Forge 没有 Bukkit 的 `/tps`、`/ping` 命令，本模组通过 Forge 事件总线自行统计 tick 间隔，**不需要前置 mod，也不需要解析 `/forge tps` 命令输出**。
+
+### 🛡️ 远程指令执行
 通过 REST API 远程执行服务器指令，支持黑白名单过滤：
 - 🛡️ **过滤模式** — `NONE` / `BLACKLIST` / `WHITELIST`
 - 🔀 **通配符匹配** — 指令列表支持 `*` 通配符
 
-### 玩家事件通知
-- 🟢 玩家加入服务器时通知
-- 🔴 玩家离开服务器时通知
-
-### 游戏内 AI 聊天
+### 🤖 游戏内 AI 聊天
 在游戏内直接与 AstrBot 的 AI 对话：
 - 👥 **群聊 AI** — 前缀触发（默认 `@`）
 - 💬 **私聊 AI** — 前缀触发（默认 `#`），可自定义回显格式
 - ⏳ **思考中提示** — 可开关，AI 回复期间显示「思考中...」
+
+### 🔔 玩家事件通知
+- 🟢 玩家加入服务器时通知
+- 🔴 玩家离开服务器时通知
+
+### 🎮 游戏内指令
+详见 [游戏内指令](#-游戏内指令) 章节，支持状态查看、配置热重载、token 管理与连接数查询。
 
 ---
 
@@ -57,7 +85,7 @@
 ### 第一步：下载 mod
 从 [GitHub Releases](https://github.com/OMSociety/AstrBotAdapter_Forge/releases/latest) 下载最新版 `astrbotadapter-1.0.0-all.jar`。
 
-> 想从源码自行构建？需要 JDK 17+（ForgeGradle 1.20.1 要求），执行 `./gradlew build`，产物位于 `build/libs/`。
+> 想从源码自行构建？需要 JDK 17+（ForgeGradle 1.20.1 要求），执行 `./gradlew build`，产物位于 `build/libs/`（发布用 `-all.jar`，已内置 netty/snakeyaml 依赖）。
 
 ### 第二步：安装
 1. 将 jar 放入服务端 `mods/` 目录
@@ -67,6 +95,22 @@
 1. 获取认证 token：游戏内执行 `/astrbot token show`，或查看配置文件中的 `auth.token`
 2. 在 AstrBot 安装孪生插件 [Minecraft 适配器](https://github.com/Railgun19457/astrbot_plugin_minecraft_adapter)，用于对接本 mod
 3. 在插件中添加服务器，配置地址、端口（默认 `8765`）和认证 token
+
+> 💡 模组开箱即用：默认配置（监听 `0.0.0.0:8765`，WS + REST 双通道）即可连接，无需额外调整。
+
+---
+
+## 🎮 游戏内指令
+
+| 指令 | 说明 |
+|------|------|
+| `/astrbot help` | 显示帮助信息 |
+| `/astrbot reload` | 重载配置文件（含网络配置，自动重启通信服务） |
+| `/astrbot status` | 显示 ws/restapi 运行状态 |
+| `/astrbot token [show/regen]` | 显示/重新生成认证 token |
+| `/astrbot connections` | 显示当前活跃的 ws 连接 |
+
+> 权限：敏感子命令（`reload` / `token` / `connections`）需要 **OP 等级 2**（Forge 无 Bukkit 权限系统，按 OP 等级判定）
 
 ---
 
@@ -147,6 +191,68 @@
 
 > `updateCheck` 与 `proxyMode` 为上游兼容保留配置，Forge 版本不生效。
 
+### 快速配置模板
+
+参考以下结构（`config/astrbotadapter/config.yml`）：
+
+```yaml
+general:
+  language: zh_CN
+  debug: false
+
+auth:
+  token: ""            # 留空启动时自动生成
+
+server:
+  host: "0.0.0.0"
+  port: 8765
+  websocket:
+    enabled: true
+    heartbeatInterval: 30
+    heartbeatTimeout: 90
+  restapi:
+    enabled: true
+    rateLimit: 100
+
+messageForward:
+  enabled: true
+  prefix: "*"
+  stripPrefix: true
+  incomingFormat: "§7[§b{platform}§7] §f{username}§7: §f{content}"
+
+aiChat:
+  group: { enabled: true, prefix: "@" }
+  private: { enabled: true, prefix: "#", echoFormat: "<{player}> {message}" }
+  responseFormat: "§7[§dAI§7] §f{content}"
+  thinkingMessage: "§7[§dAI§7] §e思考中..."
+  showThinking: true
+  timeout: 60
+
+playerNotification:
+  join: { enabled: true }
+  quit: { enabled: true }
+
+commandExecution:
+  enabled: true
+  filterType: BLACKLIST
+  commandList:
+    - "op *"
+    - "deop *"
+    - "stop"
+    - "reload"
+    - "restart"
+    - "ban *"
+    - "ban-ip *"
+    - "pardon *"
+    - "pardon-ip *"
+    - "whitelist *"
+
+logQuery:
+  enabled: true
+  maxLines: 1000
+  logFile: ""
+```
+
 ---
 
 ## 🧩 架构
@@ -162,37 +268,32 @@
 - 玩家操作 / 聊天消息 / 指令执行 / 服务器信息上报
 - 仅需替换实现类即可迁移至其他平台
 
+### TPS 自统计（ForgeTpsTracker）
+Forge 无 Bukkit TPS API，本模组订阅 `TickEvent.ServerTickEvent` 自行统计：
+- 滑动窗口（1m / 5m / 15m）平均 tick 间隔 → TPS / MSPT
+- `volatile` 缓存，REST 线程无锁读取
+- 事件总线 API 跨 1.20.1~1.21 稳定，为多版本适配预留
+
 ### 通信协议
 与 [astrbot_plugin_minecraft_adapter](https://github.com/Railgun19457/astrbot_plugin_minecraft_adapter) 对接（`PROTOCOL_VERSION = 2`），消息格式详见 [doc/protocol.md](doc/protocol.md)。
+REST 返回同时提供顶层扁平字段与 `servers[]` 结构，兼容孪生插件解析与协议文档。
 
 ---
 
-## 🎮 游戏内指令
+## 📝 更新日志
 
-| 指令 | 说明 |
-|------|------|
-| `/astrbot help` | 显示帮助信息 |
-| `/astrbot reload` | 重载配置文件 |
-| `/astrbot status` | 显示 ws/restapi 运行状态 |
-| `/astrbot token [show/regen]` | 显示/重新生成认证 token |
-| `/astrbot connections` | 显示当前活跃的 ws 连接 |
-
-> 权限：敏感子命令（`reload` / `token` / `connections`）需要 **OP 等级 2**（Forge 无 Bukkit 权限系统，按 OP 等级判定）
-
----
-
-## 📝 开发规划
-
-> 短期内不会有进一步开发，欢迎提ISSUE和PR
-
-- 适配更多版本
-- 实现游戏内指令与热重载功能
+> 📋 **[查看完整更新日志 →](CHANGELOG.md)**
 
 ---
 
 ## 🤝 贡献与反馈
 
-如遇问题请在 [GitHub Issues](https://github.com/OMSociety/MineAstrbotForge/issues) 提交，欢迎 Pull Request！
+如遇问题请在 [GitHub Issues](https://github.com/OMSociety/AstrBotAdapter_Forge/issues) 提交，欢迎 Pull Request！
+
+## 🙏 致谢
+
+- [AstrBot](https://github.com/AstrBotDevs/AstrBot) 开源聊天机器人框架
+- [AstrBotAdapter](https://github.com/Railgun19457/AstrBotAdapter) 上游插件（[railgun19457](https://github.com/Railgun19457)）
 
 ---
 

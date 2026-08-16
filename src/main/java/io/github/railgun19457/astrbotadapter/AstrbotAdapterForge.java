@@ -6,7 +6,6 @@ import io.github.railgun19457.astrbotadapter.platform.forge.listener.ForgeChatLi
 import io.github.railgun19457.astrbotadapter.platform.forge.listener.ForgePlayerListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,6 +41,12 @@ public class AstrbotAdapterForge {
         MinecraftServer server = event.getServer();
         plugin = new ForgeAdapterPlugin(server);
         plugin.initialize();
+
+        // 注意：Forge 中 RegisterCommandsEvent 在 MinecraftServer 构造函数（创建 Commands 时）
+        // 触发，早于 ServerStartingEvent；此时 plugin 尚未创建，因此命令需在此处补注册。
+        // （Brigadier dispatcher 在构造函数中已就绪，随时可注册命令）
+        AstrbotCommand.register(server.getCommands().getDispatcher(), plugin);
+        LOGGER.info("游戏内指令 /astrbot 已注册");
     }
 
     @SubscribeEvent
@@ -49,13 +54,6 @@ public class AstrbotAdapterForge {
         if (plugin != null) {
             plugin.shutdown();
             plugin = null;
-        }
-    }
-
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event) {
-        if (plugin != null) {
-            AstrbotCommand.register(event.getDispatcher(), plugin);
         }
     }
 
@@ -99,11 +97,10 @@ public class AstrbotAdapterForge {
                 MinecraftForge.EVENT_BUS.register(chatListener);
                 logger.info("Forge 聊天监听器已注册");
             }
-            if (notificationService != null) {
-                playerListener = new ForgePlayerListener(notificationService);
-                MinecraftForge.EVENT_BUS.register(playerListener);
-                logger.info("Forge 玩家监听器已注册");
-            }
+            // 玩家监听器始终注册：即便通知功能关闭，也需维护在线时长统计
+            playerListener = new ForgePlayerListener(notificationService);
+            MinecraftForge.EVENT_BUS.register(playerListener);
+            logger.info("Forge 玩家监听器已注册");
         }
 
         private void unregisterForgeListeners() {

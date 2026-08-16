@@ -9,9 +9,13 @@ import net.minecraft.server.MinecraftServer;
 public class ForgeServer implements CommonServer {
 
     private final MinecraftServer server;
+    private final ForgeTpsTracker tpsTracker;
+    private final long startTime;
 
-    public ForgeServer(MinecraftServer server) {
+    public ForgeServer(MinecraftServer server, ForgeTpsTracker tpsTracker) {
         this.server = server;
+        this.tpsTracker = tpsTracker;
+        this.startTime = System.currentTimeMillis();
     }
 
     @Override
@@ -40,9 +44,19 @@ public class ForgeServer implements CommonServer {
     }
 
     @Override
+    public double[] getTps() {
+        // Forge 无 Bukkit getTPS()，由 ForgeTpsTracker 基于 ServerTickEvent 自统计
+        return tpsTracker.getTps();
+    }
+
+    @Override
+    public Double getMspt() {
+        return tpsTracker.getMspt();
+    }
+
+    @Override
     public long getUptime() {
-        // 由 PlatformAdapter 层基于启动时间计算
-        return 0;
+        return System.currentTimeMillis() - startTime;
     }
 
     @Override
@@ -52,6 +66,7 @@ public class ForgeServer implements CommonServer {
 
     @Override
     public String getIp() {
-        return server.getLocalIp();
+        String ip = server.getLocalIp();
+        return ip == null || ip.isEmpty() ? "0.0.0.0" : ip;
     }
 }

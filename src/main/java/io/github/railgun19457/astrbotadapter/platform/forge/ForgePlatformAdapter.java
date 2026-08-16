@@ -28,12 +28,14 @@ public class ForgePlatformAdapter implements PlatformAdapter {
     private final java.util.logging.Logger logger;
     private final CommonServer serverInfo;
     private final CommonScheduler scheduler;
+    private final ForgeTpsTracker tpsTracker;
     private final long startTime;
 
     public ForgePlatformAdapter(MinecraftServer server, java.util.logging.Logger logger) {
         this.server = server;
         this.logger = logger;
-        this.serverInfo = new ForgeServer(server);
+        this.tpsTracker = new ForgeTpsTracker();
+        this.serverInfo = new ForgeServer(server, tpsTracker);
         this.scheduler = new ForgeScheduler(server);
         this.startTime = System.currentTimeMillis();
     }
@@ -203,11 +205,13 @@ public class ForgePlatformAdapter implements PlatformAdapter {
 
     @Override
     public void initialize() {
-        logger.info("Forge 适配器已初始化");
+        tpsTracker.register();
+        logger.info("Forge 适配器已初始化（TPS 统计已启动）");
     }
 
     @Override
     public void shutdown() {
+        tpsTracker.unregister();
         scheduler.cancelAll();
         logger.info("Forge 适配器已关闭");
     }

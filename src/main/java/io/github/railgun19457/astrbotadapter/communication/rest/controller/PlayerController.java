@@ -139,6 +139,9 @@ public class PlayerController {
         copyIfPresent(full, summary, "online");
         copyIfPresent(full, summary, "server");
         copyIfPresent(full, summary, "ping");
+        copyIfPresent(full, summary, "world");
+        copyIfPresent(full, summary, "gameMode");
+        copyIfPresent(full, summary, "isOp");
         copyIfPresent(full, summary, "dataSource");
         return summary;
     }
@@ -542,7 +545,7 @@ public class PlayerController {
         });
 
         try {
-            return future.get(3, TimeUnit.SECONDS);
+            return future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("获取玩家数据失败", e);
         }

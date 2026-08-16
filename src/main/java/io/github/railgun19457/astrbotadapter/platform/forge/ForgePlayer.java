@@ -11,10 +11,28 @@ import java.util.UUID;
  */
 public class ForgePlayer implements CommonPlayer {
 
+    /** 玩家 UUID → 本次加入服务器时间戳（毫秒），由 ForgePlayerListener 维护 */
+    private static final java.util.concurrent.ConcurrentHashMap<UUID, Long> JOIN_TIMES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     private final ServerPlayer player;
 
     public ForgePlayer(ServerPlayer player) {
         this.player = player;
+    }
+
+    /**
+     * 玩家登录时记录加入时间（由 ForgePlayerListener 调用）
+     */
+    public static void markJoin(UUID uuid) {
+        JOIN_TIMES.put(uuid, System.currentTimeMillis());
+    }
+
+    /**
+     * 玩家退出时移除记录（由 ForgePlayerListener 调用）
+     */
+    public static void markQuit(UUID uuid) {
+        JOIN_TIMES.remove(uuid);
     }
 
     /**
@@ -120,5 +138,14 @@ public class ForgePlayer implements CommonPlayer {
     @Override
     public boolean isFlying() {
         return player.getAbilities().flying;
+    }
+
+    @Override
+    public long getOnlineTime() {
+        Long join = JOIN_TIMES.get(player.getUUID());
+        if (join == null) {
+            return -1;
+        }
+        return Math.max(0, System.currentTimeMillis() - join);
     }
 }

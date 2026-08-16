@@ -233,15 +233,57 @@ public abstract class AstrbotAdapterPlugin {
 
     /**
      * 重载配置
+     * 除配置对象 / 语言 / 认证外，若网络配置（host/port/开关/心跳/限流）变化，
+     * 会重建并重启通信服务器，使新配置立即生效。
      */
     public void reload() {
         logger.info(i18nManager.getMessage(MessageKey.COMMAND_RELOAD_RELOADING));
 
+        // 快照旧网络配置（用于检测是否需要重启通信服务器）
+        PluginConfig oldConfig = configManager.getConfig();
+        String oldHost = oldConfig.getServerHost();
+        int oldPort = oldConfig.getServerPort();
+        boolean oldWs = oldConfig.isWsEnabled();
+        boolean oldRest = oldConfig.isRestEnabled();
+        int oldRateLimit = oldConfig.getRateLimit();
+        int oldHeartbeatInterval = oldConfig.getHeartbeatInterval();
+        int oldHeartbeatTimeout = oldConfig.getHeartbeatTimeout();
+
         // 重载配置
         configManager.loadConfig();
 
+        PluginConfig newConfig = configManager.getConfig();
+
+        // 网络配置变化 → 重建并重启通信服务器
+        boolean networkChanged = !java.util.Objects.equals(oldHost, newConfig.getServerHost())
+                || oldPort != newConfig.getServerPort()
+                || oldWs != newConfig.isWsEnabled()
+                || oldRest != newConfig.isRestEnabled()
+                || oldRateLimit != newConfig.getRateLimit()
+                || oldHeartbeatInterval != newConfig.getHeartbeatInterval()
+                || oldHeartbeatTimeout != newConfig.getHeartbeatTimeout();
+
+        if (networkChanged && !newConfig.isProxyModeEnabled()) {
+            boolean shouldRun = newConfig.isWsEnabled() || newConfig.isRestEnabled();
+            if (unifiedServer != null) {
+                logger.info("检测到网络配置变更，重启通信服务器...");
+                unifiedServer.stop();
+                unifiedServer = null;
+            }
+            if (shouldRun) {
+                unifiedServer = new UnifiedServer(
+                        newConfig, authManager, eventBus, platformAdapter, logger);
+                unifiedServer.setMessageHandler(this::handleWebSocketMessage);
+                unifiedServer.start();
+                logger.info("通信服务器已按新配置启动 ("
+                        + newConfig.getServerHost() + ":" + newConfig.getServerPort() + ")");
+            } else {
+                logger.info("网络配置变更：WS/REST 均已禁用，通信服务器未启动");
+            }
+        }
+
         // 重载语言
-        i18nManager.loadLanguage(configManager.getConfig().getLanguage());
+        i18nManager.loadLanguage(newConfig.getLanguage());
 
         // 重载认证
         authManager.reload();
