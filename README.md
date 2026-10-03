@@ -96,7 +96,7 @@
 2. 在 AstrBot 安装孪生插件 [Minecraft 适配器](https://github.com/Railgun19457/astrbot_plugin_minecraft_adapter)，用于对接本 mod
 3. 在插件中添加服务器，配置地址、端口（默认 `8765`）和认证 token
 
-> **提示：**模组开箱即用：默认配置（监听 `0.0.0.0:8765`，WS + REST 双通道）即可连接，无需额外调整。
+> **提示**：模组开箱即用：默认配置（监听 `0.0.0.0:8765`，WS + REST 双通道）即可连接，无需额外调整。
 
 ---
 
@@ -110,7 +110,7 @@
 | `/astrbot token [show/regen]` | 显示/重新生成认证 token |
 | `/astrbot connections` | 显示当前活跃的 ws 连接 |
 
-> **权限：**敏感子命令（`reload` / `token` / `connections`）需要 **OP 等级 2**（Forge 无 Bukkit 权限系统，按 OP 等级判定）
+> **权限**：敏感子命令（`reload` / `token` / `connections`）需要 **OP 等级 2**（Forge 无 Bukkit 权限系统，按 OP 等级判定）
 
 ---
 
